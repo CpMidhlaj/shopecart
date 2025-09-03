@@ -1,4 +1,4 @@
-import { Button, Col, Container, Form, InputGroup, Row } from "react-bootstrap"
+import { Button, Col, Container, Form, Image, InputGroup, Row } from "react-bootstrap"
 import * as formik from 'formik';
 import * as yup from 'yup';
 import "./AddProduct.css"
@@ -33,6 +33,22 @@ function AddProduct(){
         return newPhotos;
       })
     }
+    const handleProductImageChange = (e,i)=>{
+        const fileList = Array.from(e.target.files);
+        setProductPhotos((prev)=>{
+          const updatedPhotos = [...prev];
+          updatedPhotos[i] = fileList;
+          return updatedPhotos;
+        })
+    }
+
+    const handleProductPhotoCancel = (i)=>{
+         setProductPhotos((prev)=>{
+          const updatedPhotos = [...prev];
+          updatedPhotos.splice(i,1);
+          return updatedPhotos
+         })
+    }
     console.log("productphotos----->",productPhotos);
     
 
@@ -41,6 +57,7 @@ function AddProduct(){
       // product.id = Date.now()
       // dispatch(addProducts(product))
       // console.log(products);
+
       dispatch(addProductThunk(product))
     .unwrap()
     .then((data) => toastAndNavigate(data.success,data.message, '/listproduct'))
@@ -124,6 +141,15 @@ function AddProduct(){
                   {productPhotos &&
                     productPhotos.map((file, i) => (
                       <Row className="mb-3" key={i}>
+                        {file && file.length > 0 ?(
+                          <Col className="mb-3 d-flex gap-3">
+                            <Image src={URL.createObjectURL(file[0])} alt={file[0].name} thumbnail/>
+                            <div>
+                              <p>{file[0].name}</p>
+                              <Button variant="outline-danger" onClick={(event)=>handleProductImageChange(event,i)}>delete</Button>
+                            </div>
+                          </Col>
+                        ):(
                         <Form.Group as={Col} controlId="validationFormik03">
                           <Form.Label></Form.Label>
                           <InputGroup>
@@ -131,12 +157,15 @@ function AddProduct(){
                               placeholder={`upload product photo ${i + 1}`}
                               aria-label="Recipient's username"
                               aria-describedby="basic-addon2"
+                              type="file"
+                              onChange={(event)=>handleProductImageChange(event,i)}
                             />
-                            <Button variant="outline-secondary">
+                            <Button variant="outline-secondary" onClick={()=>handleProductPhotoCancel(i)}>
                               cancel
                             </Button>
                           </InputGroup>
                         </Form.Group>
+                        )}
                       </Row>
                     ))}
                   <div className="mb-4 mt-3">
